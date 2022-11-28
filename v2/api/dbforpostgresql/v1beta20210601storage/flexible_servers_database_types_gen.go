@@ -7,6 +7,7 @@ import (
 	"github.com/Azure/azure-service-operator/v2/pkg/genruntime"
 	"github.com/Azure/azure-service-operator/v2/pkg/genruntime/conditions"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -131,14 +132,15 @@ type FlexibleServersDatabaseList struct {
 
 // Storage version of v1beta20210601.Database_STATUS
 type Database_STATUS struct {
-	Charset     *string                `json:"charset,omitempty"`
-	Collation   *string                `json:"collation,omitempty"`
-	Conditions  []conditions.Condition `json:"conditions,omitempty"`
-	Id          *string                `json:"id,omitempty"`
-	Name        *string                `json:"name,omitempty"`
-	PropertyBag genruntime.PropertyBag `json:"$propertyBag,omitempty"`
-	SystemData  *SystemData_STATUS     `json:"systemData,omitempty"`
-	Type        *string                `json:"type,omitempty"`
+	Charset     *string                      `json:"charset,omitempty"`
+	Collation   *string                      `json:"collation,omitempty"`
+	Conditions  []conditions.Condition       `json:"conditions,omitempty"`
+	Id          *string                      `json:"id,omitempty"`
+	Name        *string                      `json:"name,omitempty"`
+	PropertyBag genruntime.PropertyBag       `json:"$propertyBag,omitempty"`
+	SystemData  *SystemData_STATUS           `json:"systemData,omitempty"`
+	Type        *string                      `json:"type,omitempty"`
+	Binding     *corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
 var _ genruntime.ConvertibleStatus = &Database_STATUS{}
@@ -148,6 +150,7 @@ func (database *Database_STATUS) ConvertStatusFrom(source genruntime.Convertible
 	if source == database {
 		return errors.New("attempted conversion between unrelated implementations of github.com/Azure/azure-service-operator/v2/pkg/genruntime/ConvertibleStatus")
 	}
+	database.Binding.Name = "secret7"
 
 	return source.ConvertStatusTo(database)
 }
@@ -158,6 +161,7 @@ func (database *Database_STATUS) ConvertStatusTo(destination genruntime.Converti
 		return errors.New("attempted conversion between unrelated implementations of github.com/Azure/azure-service-operator/v2/pkg/genruntime/ConvertibleStatus")
 	}
 
+	database.Binding.Name = "secret8"
 	return destination.ConvertStatusFrom(database)
 }
 
@@ -178,6 +182,7 @@ type FlexibleServers_Database_Spec struct {
 	Owner       *genruntime.KnownResourceReference `group:"dbforpostgresql.azure.com" json:"owner,omitempty" kind:"FlexibleServer"`
 	PropertyBag genruntime.PropertyBag             `json:"$propertyBag,omitempty"`
 	Tags        map[string]string                  `json:"tags,omitempty"`
+	Binding     *corev1.LocalObjectReference       `json:"binding,omitempty"`
 }
 
 var _ genruntime.ConvertibleSpec = &FlexibleServers_Database_Spec{}

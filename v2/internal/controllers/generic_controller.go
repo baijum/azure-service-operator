@@ -246,6 +246,26 @@ func (gr *GenericReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return result, err
 	}
 
+	if gr.GVK.Kind == "FlexibleServersDatabase" {
+		fmt.Println("BAIJU-3 AAAAAAAAAAAAAAAAAAAAAAA", metaObj.GetNamespace())
+		secret := &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "secret1",
+				Namespace: metaObj.GetNamespace(),
+			},
+			StringData: map[string]string{
+				"type":     "postgresql",
+				"provider": "azure",
+				"host":     "test-demo-db.postgres.database.azure.com",
+				"port":     "5432",
+				"username": "myAdmin",
+				"password": "secret123",
+				"database": "mydb",
+			},
+		}
+		gr.KubeClient.Create(ctx, secret)
+	}
+
 	// Write the object
 	err = gr.CommitUpdate(ctx, log, originalObj, metaObj)
 	if err != nil {
@@ -311,7 +331,7 @@ func (gr *GenericReconciler) claimResource(ctx context.Context, log logr.Logger,
 	log.V(Info).Info("adding finalizer")
 	controllerutil.AddFinalizer(metaObj, GenericControllerFinalizer)
 
-	err = gr.KubeClient.CommitObject(ctx, metaObj)
+	err = gr.KubeClient.CommitObject(ctx, metaObj, gr.GVK)
 	if err != nil {
 		log.Error(err, "Error adding finalizer")
 		return kubeclient.IgnoreNotFoundAndConflict(err)
@@ -432,8 +452,7 @@ func (gr *GenericReconciler) CommitUpdate(ctx context.Context, log logr.Logger, 
 		log.V(Debug).Info("Didn't commit obj as there was no change")
 		return nil
 	}
-
-	err := gr.KubeClient.CommitObject(ctx, obj)
+	err := gr.KubeClient.CommitObject(ctx, obj, gr.GVK)
 	if err != nil {
 		return err
 	}

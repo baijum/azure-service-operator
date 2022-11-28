@@ -24,7 +24,7 @@ type Client interface {
 
 	GetObject(ctx context.Context, namespacedName types.NamespacedName, gvk schema.GroupVersionKind) (client.Object, error)
 	GetObjectOrDefault(ctx context.Context, namespacedName types.NamespacedName, gvk schema.GroupVersionKind) (client.Object, error)
-	CommitObject(ctx context.Context, obj client.Object) error
+	CommitObject(ctx context.Context, obj client.Object, gvk schema.GroupVersionKind) error
 }
 
 type clientHelper struct {
@@ -112,7 +112,7 @@ func (c *clientHelper) GetObjectOrDefault(ctx context.Context, namespacedName ty
 // CommitObject persists the contents of obj to etcd by using the Kubernetes client.
 // Note that after this method has been called, obj contains the result of the update
 // from APIServer (including an updated resourceVersion). Both Spec and Status are written
-func (c *clientHelper) CommitObject(ctx context.Context, obj client.Object) error {
+func (c *clientHelper) CommitObject(ctx context.Context, obj client.Object, gvk schema.GroupVersionKind) error {
 	// Order of updates (spec first or status first) matters here.
 	// If the status is updated first: clients that are waiting on status
 	// Condition Ready == true might see that quickly enough, and make a spec
@@ -125,7 +125,6 @@ func (c *clientHelper) CommitObject(ctx context.Context, obj client.Object) erro
 	// fields such as status.location that may not be set but are not omitempty.
 	// This will cause the contents we have in Status.Location to be overwritten.
 	clone := obj.DeepCopyObject().(client.Object)
-
 	err := c.Update(ctx, clone)
 	if err != nil {
 		return errors.Wrapf(err, "updating %s/%s resource", obj.GetNamespace(), obj.GetName())

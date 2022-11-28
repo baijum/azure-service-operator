@@ -13,6 +13,7 @@ package v1beta20210601
 import (
 	"github.com/Azure/azure-service-operator/v2/pkg/genruntime"
 	"github.com/Azure/azure-service-operator/v2/pkg/genruntime/conditions"
+	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -446,6 +447,11 @@ func (in *Database_STATUS) DeepCopyInto(out *Database_STATUS) {
 	if in.Type != nil {
 		in, out := &in.Type, &out.Type
 		*out = new(string)
+		**out = **in
+	}
+	if in.Binding != nil {
+		in, out := &in.Binding, &out.Binding
+		*out = new(v1.LocalObjectReference)
 		**out = **in
 	}
 }
@@ -1160,6 +1166,11 @@ func (in *FlexibleServers_Database_Spec) DeepCopyInto(out *FlexibleServers_Datab
 		for key, val := range *in {
 			(*out)[key] = val
 		}
+	}
+	if in.Binding != nil {
+		in, out := &in.Binding, &out.Binding
+		*out = new(v1.LocalObjectReference)
+		**out = **in
 	}
 }
 

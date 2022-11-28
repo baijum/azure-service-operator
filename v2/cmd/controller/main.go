@@ -109,6 +109,7 @@ func main() {
 
 	log := ctrl.Log.WithName("controllers")
 	log.V(Status).Info("Configuration details", "config", cfg.String())
+	log.V(Status).Info("BAIJU-1-AAAAAAAAAAAAAAAAAAAAAAAAAAA")
 
 	if cfg.OperatorMode.IncludesWatchers() {
 		positiveConditions := conditions.NewPositiveConditionBuilder(clock.New())

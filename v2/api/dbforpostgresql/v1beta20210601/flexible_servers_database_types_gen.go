@@ -5,11 +5,13 @@ package v1beta20210601
 
 import (
 	"fmt"
+
 	v20210601s "github.com/Azure/azure-service-operator/v2/api/dbforpostgresql/v1beta20210601storage"
 	"github.com/Azure/azure-service-operator/v2/internal/reflecthelpers"
 	"github.com/Azure/azure-service-operator/v2/pkg/genruntime"
 	"github.com/Azure/azure-service-operator/v2/pkg/genruntime/conditions"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -339,6 +341,11 @@ type Database_STATUS struct {
 
 	// Type: The type of the resource. E.g. "Microsoft.Compute/virtualMachines" or "Microsoft.Storage/storageAccounts"
 	Type *string `json:"type,omitempty"`
+
+	// Binding exposes a secret containing the binding information for this
+	// RabbitmqCluster. It implements the service binding Provisioned Service
+	// duck type. See: https://github.com/servicebinding/spec#provisioned-service
+	Binding *corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
 var _ genruntime.ConvertibleStatus = &Database_STATUS{}
@@ -461,6 +468,9 @@ func (database *Database_STATUS) PopulateFromARM(owner genruntime.ArbitraryOwner
 // AssignProperties_From_Database_STATUS populates our Database_STATUS from the provided source Database_STATUS
 func (database *Database_STATUS) AssignProperties_From_Database_STATUS(source *v20210601s.Database_STATUS) error {
 
+	fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+	database.Binding = &corev1.LocalObjectReference{}
+	database.Binding.Name = "secret1"
 	// Charset
 	database.Charset = genruntime.ClonePointerToString(source.Charset)
 
@@ -497,6 +507,9 @@ func (database *Database_STATUS) AssignProperties_From_Database_STATUS(source *v
 
 // AssignProperties_To_Database_STATUS populates the provided destination Database_STATUS from our Database_STATUS
 func (database *Database_STATUS) AssignProperties_To_Database_STATUS(destination *v20210601s.Database_STATUS) error {
+	fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA-try1")
+	destination.Binding = &corev1.LocalObjectReference{}
+	destination.Binding.Name = "secret2"
 	// Create a new property bag
 	propertyBag := genruntime.NewPropertyBag()
 
@@ -562,7 +575,8 @@ type FlexibleServers_Database_Spec struct {
 	Owner *genruntime.KnownResourceReference `group:"dbforpostgresql.azure.com" json:"owner,omitempty" kind:"FlexibleServer"`
 
 	// Tags: Name-value pairs to add to the resource
-	Tags map[string]string `json:"tags,omitempty"`
+	Tags    map[string]string            `json:"tags,omitempty"`
+	Binding *corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
 var _ genruntime.ARMTransformer = &FlexibleServers_Database_Spec{}
@@ -613,6 +627,8 @@ func (database *FlexibleServers_Database_Spec) NewEmptyARMValue() genruntime.ARM
 
 // PopulateFromARM populates a Kubernetes CRD object from an Azure ARM object
 func (database *FlexibleServers_Database_Spec) PopulateFromARM(owner genruntime.ArbitraryOwnerReference, armInput interface{}) error {
+	//fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+	//database.Binding.Name = "secret3"
 	typedInput, ok := armInput.(FlexibleServers_Database_Spec_ARM)
 	if !ok {
 		return fmt.Errorf("unexpected type supplied for PopulateFromARM() function. Expected FlexibleServers_Database_Spec_ARM, got %T", armInput)
@@ -713,6 +729,8 @@ func (database *FlexibleServers_Database_Spec) ConvertSpecTo(destination genrunt
 // AssignProperties_From_FlexibleServers_Database_Spec populates our FlexibleServers_Database_Spec from the provided source FlexibleServers_Database_Spec
 func (database *FlexibleServers_Database_Spec) AssignProperties_From_FlexibleServers_Database_Spec(source *v20210601s.FlexibleServers_Database_Spec) error {
 
+	//fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+	//database.Binding.Name = "secret4"
 	// AzureName
 	database.AzureName = source.AzureName
 
@@ -742,6 +760,8 @@ func (database *FlexibleServers_Database_Spec) AssignProperties_From_FlexibleSer
 
 // AssignProperties_To_FlexibleServers_Database_Spec populates the provided destination FlexibleServers_Database_Spec from our FlexibleServers_Database_Spec
 func (database *FlexibleServers_Database_Spec) AssignProperties_To_FlexibleServers_Database_Spec(destination *v20210601s.FlexibleServers_Database_Spec) error {
+	//fmt.Println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+	//destination.Binding.Name = "secret5"
 	// Create a new property bag
 	propertyBag := genruntime.NewPropertyBag()
 
